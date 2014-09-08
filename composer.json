@@ -1,0 +1,19 @@
+{
+    "name": "decouple/app",
+    "description": "Decouple application stack",
+    "require": {
+        "hackpack/hackunit": "dev-master"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrew Ewing",
+            "email": "drew@phenocode.com"
+        }
+    ],
+    "autoload": {
+      "psr-4": {
+        "": "src/"
+      }
+    }
+}
