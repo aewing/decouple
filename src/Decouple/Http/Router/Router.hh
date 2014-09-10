@@ -16,8 +16,21 @@ class Router {
         $route = new \Decouple\Http\Router\Route\FunctionRoute($pattern, $function);
       }
       return $this->add($route);
+    } else if(is_string($function)) {
+      if(class_exists($function)) {
+        $route = new \Decouple\Http\Router\Route\RestfulRoute($pattern, $function);
+        return $this->add($route);
+      } else if(stristr($function, '@')) {
+        /** Try to automagically load Class@method syntax **/
+        list($class, $method) = explode('@', $function);
+        if(!class_exists($class) && method_exists($class, $method)) {
+          throw new \Exception(sprintf("Service is not a valid class: %s", $class));
+        }
+        $route = new \Decouple\Http\Router\Route\MethodRoute($pattern, [$class,$method]);
+        return $this->add($route);
+      }
     }
-    throw new \Exception(sprintf("Invalid route function provided for route %s", $pattern));
+    throw new \Exception(sprintf("Invalid route function provided for route %s [%s]", $pattern, $function));
   }
   public function add(AbstractRoute $route) : int {
     $this->routes->add($route);

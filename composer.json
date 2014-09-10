@@ -2,7 +2,8 @@
     "name": "decouple/app",
     "description": "Decouple application stack",
     "require": {
-        "hackpack/hackunit": "dev-master"
+        "hackpack/hackunit": "dev-master",
+        "hhvm/xhp": "dev-master"
     },
     "license": "MIT",
     "authors": [
@@ -14,6 +15,10 @@
     "autoload": {
       "psr-4": {
         "": "src/"
-      }
+      },
+      "classmap": [
+        "app/controllers",
+        "app/views"
+      ]
     }
 }
