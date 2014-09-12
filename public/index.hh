@@ -1,4 +1,6 @@
 <?hh // partial
+$start = getrusage();
+session_start('decouple');
 // Handle errors
 set_error_handler(function (int $errno , string $errstr , string $errfile , int $errline) : bool {
   echo "[#" . $errno . "]\t" . $errstr . " (in " . $errfile . " on line #" . $errline . ")";

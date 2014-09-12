@@ -1,15 +1,46 @@
 <?hh // strict
 use Decouple\Ui\Ui;
+use Decouple\ORM\Connector;
 class FrontController {
-  public function index() : string {
-    $layout = 
-      <layouts:master>
-        <front:index></front:index>
-      </layouts:master>
-    ;
-    $layout->setTitle('Decouple');
-    $layout->addStyle('semantic', '//cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/css/semantic.min.css');
-    $layout->addScript('semantic', '//cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/javascript/semantic.min.js');
-    return (string)$layout;
+  public function index(Connector $db, DebugRegistry $debug) : string {
+    $view = <front:index></front:index>;
+
+    $query = $db->query('news')
+      ->select(Vector {'id','name','content','author','create_date','image'})
+      ->where('delete_date','is',null)
+      ;
+    $result = $query->fetch();
+
+    $content = <div/>;
+    if(is_null($result)) {
+      $error = 
+        <div class="ui error message">
+          <h2>Oops!</h2>
+          <p>I couldn't find any news articles to display... Try again?</p>
+        </div>;
+      $content->appendChild($error);
+    } else {
+      $articles = <news:articles/>;
+      foreach($result as $article) {
+        $body = <news:article/>;
+        $body->setAttribute('title', $article['name']);
+        $body->setAttribute('content', $article['content']);
+        $body->setAttribute('date', $article['create_date']);
+        $body->setAttribute('image', $article['image']);
+        $articles->appendChild($body);
+      }
+      $content->appendChild($articles);
+    }
+    $view->appendChild($content);
+    $view->appendChild(<br/>);
+    $view->appendChild(<hr/>);
+    $view->appendChild(<br/>);
+    $view->appendChild(perf_info($debug));
+
+    return (string)$view;
+  }
+
+  public function test() : string {
+    return "Test";
   }
 }

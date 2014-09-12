@@ -1,6 +1,7 @@
 <?hh // partial
 use Decouple\Http\Request\Uri;
 use Decouple\Http\Request\Request;
+use Decouple\Registry\Registry;
 use Decouple\Registry\Paths;
 use Decouple\Ui\Ui;
 use Decouple\Decoupler\Decoupler;
@@ -23,11 +24,17 @@ $paths = new Paths(Map {
   "public" => $root . '/public'
 });
 
+class DebugRegistry extends Registry {}
+$debug = new DebugRegistry(Map {
+  "start_time" => $start
+});
+
 // Decoupler configuration
 $decoupler = new Decoupler(Map {
   "Decouple\Http\Request\Uri" => $uri,
   "Decouple\Http\Request\Request" => $request,
-  "Decouple\Registry\Paths" => $paths
+  "Decouple\Registry\Paths" => $paths,
+  "DebugRegistry" => $debug
 });
 
 // Router

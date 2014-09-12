@@ -36,17 +36,21 @@ class :layouts:master extends :ui:base {
 
   public function loadScripts(:xhp $head) : void {
     foreach($this->scripts as $name => $script) {
-      $head->appendChild(<script type="text/javascript" src="{$script}"></script>);
+      $tag = <script type="text/javascript"></script>;
+      $tag->setAttribute('src', $script);
+      $head->appendChild($tag);
     }
   }
 
   public function addStyle($name, $src) : void {
-    $this->scripts->set($name, $src);
+    $this->styles->set($name, $src);
   }
 
   public function loadStyles(:xhp $head) : void {
     foreach($this->styles as $name => $style) {
-      $head->appendChild(<link rel="stylesheet" href="{$style}"/>);
+      $tag = <link rel="stylesheet"/>;
+      $tag->setAttribute('href', $style);
+      $head->appendChild($tag);
     }
   }
 }

@@ -12,10 +12,13 @@ abstract class AbstractRoute implements RouteInterface {
 
   public function matches(Uri $uri) : Vector<string> {
     $matches = [];
-    preg_match_all('|' . $this->pattern . '|', $uri, $matches);
+    $remaining = preg_replace('|' . $this->pattern . '|', '', $uri);
     $result = Vector {};
-    if(is_array($matches)) {
-      $result->addAll($this->reduce($matches));
+    if(strlen($remaining) == 0) {
+      preg_match_all('|' . $this->pattern . '|', $uri, $matches);
+      if(is_array($matches)) {
+        $result->addAll($this->reduce($matches));
+      }
     }
     return $result;
   }
