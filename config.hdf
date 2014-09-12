@@ -1,3 +1,3 @@
 Server {
-  DefaultDcoument = src/index.hh
+  DefaultDcoument = public/index.hh
 }
