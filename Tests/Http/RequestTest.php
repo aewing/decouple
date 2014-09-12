@@ -1,9 +1,8 @@
-<?hh // strict
-use HackPack\HackUnit\Core\TestCase;
+<?hh // partial 
 /**
  * Test the Decouple HTTP Request class
  */
-class HttpRequestTest extends TestCase {
+class HttpRequestTest extends PHPUnit_Framework_TestCase {
   /**
    * Test request
    */
@@ -18,8 +17,8 @@ class HttpRequestTest extends TestCase {
     $files = [];
     $request = new Decouple\Http\Request\Request($uri, Map::fromArray($get), Map::fromArray($post), Map::fromArray($files));
 
-    $this->expect(serialize($request->uri->parts()))->toEqual(serialize(Vector {'foo','bar'}));
-    $this->expect($request->getParam('bar'))->toEqual('baz');
-    $this->expect($request->postParam('foo'))->toEqual('bar');
+    $this->assertEquals(serialize($request->uri->parts()), serialize(Vector {'foo','bar'}));
+    $this->assertEquals($request->getParam('bar'), 'baz');
+    $this->assertEquals($request->postParam('foo'), 'bar');
   }
 }

@@ -1,10 +1,9 @@
-<?hh // strict
-use HackPack\HackUnit\Core\TestCase;
-require_once dirname(__FILE__) . '/../Fixtures/DecouplerInjectionFixture.hh';
+<?hh // partial 
+require_once dirname(__FILE__) . '/../Fixtures/DecouplerInjectionFixture.php';
 /**
  * Test the Decouple dependency injector
  */
-class DecouplerInjectionTest extends TestCase {
+class DecouplerInjectionTest extends PHPUnit_Framework_TestCase {
   /**
    * Test object method injection
    */
@@ -18,7 +17,7 @@ class DecouplerInjectionTest extends TestCase {
     // Get the private int 
     $result = $decoupler->injectMethod($mock, 'getNumber');
     // Expect 42
-    $this->expect($result)->toEqual(42);
+    $this->assertEquals($result, 42);
   }
 
   /**
@@ -42,7 +41,7 @@ class DecouplerInjectionTest extends TestCase {
     }
 
     // Make sure the error message checks out
-    $this->expect($error)->toEqual('Unregistered dependency: UnregisteredDependency [Decoupler]');
+    $this->assertEquals($error, 'Unregistered dependency: UnregisteredDependency [Decoupler]');
   }
 
   /**
@@ -61,22 +60,22 @@ class DecouplerInjectionTest extends TestCase {
     $property = null;
     $value = null;
     // Make sure we're getting the right type of object back
-    $this->expect(($mock instanceof MockInstance))->toEqual(true);
+    $this->assertEquals(($mock instanceof MockInstance), true);
     if ($mock instanceof MockInstance) {
       // Make sure our property was injected
       $property = $mock->property;
-      $this->expect(($property instanceof PropertyDependency))->toEqual(true);
+      $this->assertEquals(($property instanceof PropertyDependency), true);
       if($property instanceof PropertyDependency) {
         // Make sure our property value is accessible
         $value = $property->value;
-        $this->expect($value)->toEqual(42);
+        $this->assertEquals($value, 42);
         // Make sure our constructor parameter was injected
         $param = $mock->param;
-        $this->expect(($param instanceof ConstructorPropertyDependency))->toEqual(true);
+        $this->assertEquals(($param instanceof ConstructorPropertyDependency), true);
         if($param instanceof ConstructorPropertyDependency) {
           // Make sure our constructor parameter value is accessible
           $pvalue = $param->value;
-          $this->expect($pvalue)->toEqual(42);
+          $this->assertEquals($pvalue, 42);
         }
       }
     }
@@ -99,9 +98,9 @@ class DecouplerInjectionTest extends TestCase {
     if($property instanceof PropertyDependency) {
       // Make sure our property value is accessible
       $value = $property->value;
-      $this->expect($value)->toEqual(21);
+      $this->assertEquals($value, 21);
       // Make sure our object methods are functioning and can access property
-      $this->expect($object->value())->toEqual(42);
+      $this->assertEquals($object->value(), 42);
     }
   }
 }

@@ -1,4 +1,0 @@
-Server {
-  DefaultDocument = public/index.hh
-  Port = PORT
-}

@@ -1,34 +1,33 @@
-<?hh // strict
-require_once dirname(__FILE__) . "/../Fixtures/HttpRouterFixture.hh";
-use HackPack\HackUnit\Core\TestCase;
+<?hh // partial 
+require_once dirname(__FILE__) . "/../Fixtures/HttpRouterFixture.php";
 use Decouple\Http\Request\Request;
 use Decouple\Http\Request\Uri;
 use Decouple\Decoupler\Decoupler;
 use Decouple\Http\Router\Router;
-class HttpRouterTest extends TestCase {
+class HttpRouterTest extends PHPUnit_Framework_TestCase {
 
   public function testRouteFunctionA() : void {
     $uri = new Uri('/foo/bar');
     $result = $this->_testRoute($uri);
-    $this->expect($result)->toEqual('bar42');
+    $this->assertEquals($result, 'bar42');
   }
 
   public function testRouteFunctionB() : void {
     $uri = new Uri('/bar/foo');
     $result = $this->_testRoute($uri);
-    $this->expect($result)->toEqual('42foo');
+    $this->assertEquals($result, '42foo');
   }
 
   public function testRouteMethodA() : void {
     $uri = new Uri('/baz/bar');
     $result = $this->_testRoute($uri);
-    $this->expect($result)->toEqual('Controller::/baz/bar/42');
+    $this->assertEquals($result, 'Controller::/baz/bar/42');
   }
 
   public function testRouteMethodB() : void {
     $uri = new Uri('/baz/bang');
     $result = $this->_testRoute($uri);
-    $this->expect($result)->toEqual('Controller::bang/42');
+    $this->assertEquals($result, 'Controller::bang/42');
   }
 
   private function _testRoute(Uri $uri) : mixed {

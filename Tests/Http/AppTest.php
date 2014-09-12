@@ -1,5 +1,4 @@
-<?hh // strict
-use HackPack\HackUnit\Core\TestCase;
+<?hh // partial 
 use Decouple\Decoupler\Decoupler;
 use Decouple\Http\Request\Request;
 use Decouple\Http\Request\Uri;
@@ -8,22 +7,22 @@ use Decouple\Http\Router\Router;
 use Decouple\Http\Http;
 use Decouple\Registry\Paths;
 use Decouple\Log\Log;
-require_once dirname(__FILE__) . '/../Fixtures/HttpAppFixture.hh';
-class AppTest extends TestCase {
+require_once dirname(__FILE__) . '/../Fixtures/HttpAppFixture.php';
+class AppTest extends PHPUnit_Framework_TestCase {
   public function testAppBootstrapA() : void {
     $app = $this->__bootstrap("/foo/bar");
     $result = $app->execute();
-    $this->expect($result)->toEqual('FooBar!');
+    $this->assertEquals($result, 'FooBar!');
   }
   public function testAppBootstrapB() : void {
     $app = $this->__bootstrap("/bar/baz");
     $result = $app->execute();
-    $this->expect($result)->toEqual('baz');
+    $this->assertEquals($result, 'baz');
   }
   public function testAppBootstrapC() : void {
     $app = $this->__bootstrap("/bang/bam");
     $result = $app->execute();
-    $this->expect($result)->toEqual('Bang!');
+    $this->assertEquals($result, 'Bang!');
   }
   public function __bootstrap(string $uri) : Http {
     // Http request

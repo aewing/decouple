@@ -2,27 +2,20 @@
 namespace Decouple\ORM;
 use PDO;
 class Connector {
-  private bool $connected;
-  private PDO $pdo;
-  public function __construct(string $dsn, string $username, string $password)
+  protected bool $connected;
+  protected PDO $pdo;
+  public function __construct(string $dsn, ?string $username=null, ?string $password=null)
   {
       $this->pdo = new PDO($dsn, $username, $password);
-      $this->connected = false;
-  }
-  public function pdo() : \PDO
-  {
-    if(!$this->connected) {
-    }
-    if(!$this->pdo) {
-      throw new \Exception("Unable to connect to database");
-    }
-    $this->connected = true;
-    return $this->pdo;
+      $this->connected = ($this->pdo) ? true : false;
   }
   public function query(string $table) : Query {
     return new Query($this->pdo, $table);
   }
   public function table(string $table) : Table {
     return new Table($this->pdo, $table);
+  }
+  public function connected() : bool {
+    return $this->connected;
   }
 }

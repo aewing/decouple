@@ -1,7 +1,6 @@
-<?hh // strict
-require_once dirname(__FILE__) . "/../Fixtures/HttpRouterFixture.hh";
-use HackPack\HackUnit\Core\TestCase;
-class HttpRouteTest extends TestCase {
+<?hh // partial 
+require_once dirname(__FILE__) . "/../Fixtures/HttpRouterFixture.php";
+class HttpRouteTest extends PHPUnit_Framework_TestCase {
   public function testRoute() : void {
     $dependencies = Map {
       "RouteDependency" => new RouteDependency() 
@@ -16,6 +15,6 @@ class HttpRouteTest extends TestCase {
     });
     $function = $route->execute($request);
     $result = $decoupler->injectFunction($function);
-    $this->expect($result)->toEqual(42);
+    $this->assertEquals($result, 42);
   }
 }
