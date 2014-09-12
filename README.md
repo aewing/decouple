@@ -1,3 +1,4 @@
 decouple
 ==========
-Sandbox for Decouple
+Sandbox for decouple
+Requires composer & phpunit
