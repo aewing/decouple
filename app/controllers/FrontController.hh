@@ -9,7 +9,7 @@ class FrontController {
       ->select(Vector {'id','name','content','author','create_date','image'})
       ->where('delete_date','is',null)
       ;
-    $result = $query->fetch();
+    $result = $db->fetchAll($query);
 
     $content = <div/>;
     if(is_null($result)) {

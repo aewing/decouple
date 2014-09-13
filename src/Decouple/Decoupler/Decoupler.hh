@@ -17,29 +17,53 @@ class Decoupler {
   public function contains(string $name) : bool {
     return $this->dependencies->contains($name);
   }
+  /**
+   * Get a specific dependency
+   */
   public function get(string $name) : mixed {
     return $this->dependencies->get($name);
   }
+  /**
+   * Get all of the registered dependencies
+   */
   public function getAll() : Map<string,mixed> {
     return $this->dependencies;
   }
+  /**
+   * Assert that the given class exists
+   */
   protected function verifyName(string $name) : void {
     if(!class_exists($name)) {
       throw new \Exception(sprintf("%s is not a registered class name [Decoupler]", $name));
     }
   }
+  /**
+   * Inject an object
+   */
   public function injectObject(mixed $object) : mixed {
     return decouple_inject_object($object, $this);
   }
+  /**
+   * Inject an instance
+   */
   public function injectInstance(string $className) : mixed {
     return decouple_inject_instance($className, $this);
   }
+  /**
+   * Inject a method
+   */
   public function injectMethod(mixed $object, string $method) : mixed {
     return decouple_inject_method($object, $method, $this);
   }
+  /**
+   * Inject a function
+   */
   public function injectFunction(mixed $function) : mixed {
     return decouple_inject_function($function, $this);
   }
+  /**
+   * Inect a function, class (instance), or object
+   */
   public function inject(mixed $target) : mixed {
     if(is_array($target) && count($target) == 2) {
       if(is_string($target[0])) {
