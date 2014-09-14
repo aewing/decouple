@@ -2,16 +2,14 @@
 namespace Decouple\ORM;
 use PDO;
 class Query {
-  public string $table;
   private string $action;
   private Map<string,mixed> $data;
   private Vector<mixed> $selectFields;
-  private Vector<Vector<string>> $whereData;
+  private Vector<Vector<mixed>> $whereData;
   public ?\PDOStatement $query;
   public ?string $query_raw;
-  public function __construct(string $table='', string $driver='mysql')
+  public function __construct(public string $table='', public string $driver='mysql')
   {
-    $this->table = $table;
     $this->selectFields = Vector {};
     $this->data = Map {};
     $this->whereData = Vector {};
@@ -20,7 +18,7 @@ class Query {
   public function select(?Vector<mixed> $fields=null) : Query {
     $this->action = 'select';
     if(is_null($fields)) {
-      $tfields = Vector {"*"};
+      $fields = Vector {"*"};
     }
     if(!is_null($fields)) {
       $this->selectFields->addAll($fields);
@@ -29,8 +27,20 @@ class Query {
   }
   public function update(Map<string,mixed> $data) : Query {
     $this->action = 'update';
+    $data['modified'] = time();
     $this->data->setAll($data);
     return $this;
+  }
+  public function delete(bool $soft=false) : Query {
+    if(!$soft) {
+      $this->action = 'delete';
+      return $this;
+    } else {
+      $this->action = 'update';
+      $data = Map { "deleted" => time() };
+      $this->data->setAll($data);
+      return $this;
+    }
   }
   public function insert(Map<string,mixed> $data) : Query\Prepared {
     $this->action = 'insert';
@@ -38,7 +48,7 @@ class Query {
     return $this->buildQuery();
   }
   public function where(string $field, string $comp, mixed  $value) : Query {
-    $this->whereData->add(Vector{$field,$comp,(string)$value});
+    $this->whereData->add(Vector{$field, $comp, $value});
     return $this;
   }
   public function whereAll(KeyedTraversable<string,string> $array) : Query
@@ -62,9 +72,15 @@ class Query {
     } else if($this->action == 'update') {
       $query = 'UPDATE ' . $this->table . ' SET ';
       foreach($this->data as $var => $val) {
-        $query .= $var .' = :' . $var . ', ';
+        if($var !== 'modified') {
+          $query .= $var .' = :' . $var . ', ';
+        }
       }
-      $query .= 'modified = :modified';
+      if($this->driver == 'sqlite') {
+        $query .= 'modified = strftime("%s", :modified)';
+      } else {
+        $query .= 'modified = FROM_UNIXTIME(:modified)';
+      }
     } else if($this->action == 'insert') {
       $columns = [];
       $values = [];
@@ -72,12 +88,13 @@ class Query {
         $columns[] = $var;
         $values[] = ':' . $var;
       }
-      $columns[] = 'created';
-      $values[] = ':created';
       $columns = implode(',', $columns);
       $values = implode(',', $values);
       $query = sprintf('INSERT INTO %s (%s) VALUES(%s)', $this->table, $columns, $values);
+    } else if($this->action == 'delete') {
+      $query = 'DELETE FROM ' . $this->table;
     }
+
     $whereFields = Map {};
     if(count($this->whereData) > 0) {
       $query .= ' WHERE ';
@@ -98,11 +115,9 @@ class Query {
       }
       $query = substr($query,0,-4);
     }
-    if($this->action == 'select') {
-      $fields = $whereFields;
-    } else {
-      $fields = $this->data;
-    }
+    $fields = Map {};
+    $fields->setAll($whereFields);
+    $fields->setAll($this->data);
     return new Query\Prepared($query, $fields);
   }
   public function raw(mixed $value) : Query\Raw {

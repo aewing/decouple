@@ -1,14 +1,15 @@
 <?hh // strict
 use Decouple\Ui\Ui;
 use Decouple\ORM\Connector;
+use Decouple\ORM\Query\Raw;
 class FrontController {
   public function index(Connector $db, DebugRegistry $debug) : string {
     $view = <front:index></front:index>;
-
-    $query = $db->query('news')
+    $news = $db->table('news');
+    $query = $news
       ->select(Vector {'id','name','content','author','create_date','image'})
-      ->where('delete_date','is',null)
-      ;
+      ->where('delete_date', 'is', new Raw(null))
+    ;
     $result = $db->fetchAll($query);
 
     $content = <div/>;

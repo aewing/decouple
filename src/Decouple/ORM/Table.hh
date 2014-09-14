@@ -14,4 +14,12 @@ class Table {
     $query = new Query($this->name, $this->driver);
     return $query->insert(Map::fromArray($data));
   }
+  public function update(array<string,mixed> $data) : Query {
+    $query = new Query($this->name, $this->driver);
+    return $query->update(Map::fromArray($data));
+  }
+  public function delete() : Query {
+    $query = new Query($this->name, $this->driver);
+    return $query->delete();
+  }
 }

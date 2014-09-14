@@ -70,40 +70,6 @@ class Create {
       $type = "VARCHAR(255)";
       $fields[] = $field->name;
       $extras = [];
-      if($field->type == "int") {
-        $type = sprintf("INT(%s)", $field->getAttribute('length')); 
-      } else if($field->type == "id") {
-        $type = sprintf("INT(%s)", $field->getAttribute('length')); 
-        if($this->driver !== "sqlite") {
-          $extras[] = "AUTO_INCREMENT";
-        }
-        $after = sprintf("PRIMARY KEY (%s)", $field->name);
-      } else if($field->type == "varchar") {
-        $type = sprintf("VARCHAR(%s)", $field->getAttribute('length')); 
-      } else if($field->type == "text") {
-        $type = "TEXT";
-      } else if($field->type == "enum") {
-        if($this->driver !== "sqlite") {
-          $type = sprintf("ENUM('%s')", implode("','", $field->getAttribute('values')));
-        } else {
-          $type = sprintf("CHECK( %s IN ('%s') )", $field->name, implode("','", $field->getAttribute('values')));
-        }
-      }
-
-      // Handle signed vs unsigned
-      if($field->getAttribute('unsigned')) {
-        $extras[] = 'UNSIGNED';
-      }
-      // Handle nullability
-      if($field->getAttribute('nullable')) {
-        $null = 'NULL';
-      } else {
-        $null = 'NOT NULL';
-      }
-      // Unique 
-      if($field->getAttribute('unique')) {
-        $extras[] = 'UNIQUE';
-      }
 
       if($field->getAttribute('default')) {
         $value = $field->getAttribute('default');
@@ -115,19 +81,78 @@ class Create {
         $extras[] = sprintf('DEFAULT %s', $value);
       }
 
+
+      if($field->type == "int") {
+        if($this->driver == "sqlite") {
+          $type = "INTEGER";
+        } else {
+          $type = sprintf("INT(%s)", $field->getAttribute('length')); 
+        }
+      } else if($field->type == "id") {
+        if($this->driver !== "sqlite") {
+          $type = sprintf("INT(%s)", $field->getAttribute('length')); 
+          $extras[] = "AUTO_INCREMENT";
+          $after = sprintf("PRIMARY KEY (%s)", $field->name);
+        } else {
+          $type = "INTEGER";
+          $extras[] = "PRIMARY KEY";
+        }
+      } else if($field->type == "varchar") {
+        if($this->driver == "sqlite") {
+          $type = "TEXT";
+        } else {
+          $type = sprintf("VARCHAR(%s)", $field->getAttribute('length')); 
+        }
+      } else if($field->type == "text") {
+        $type = "TEXT";
+      } else if($field->type == "enum") {
+        if($this->driver !== "sqlite") {
+          $type = sprintf("ENUM('%s')", implode("','", $field->getAttribute('values')));
+        } else {
+          $type = "TEXT";
+          $extras[] = sprintf("CHECK ( %s IN ('%s') )", $field->name, implode("','", $field->getAttribute('values')));
+        }
+      }
+
+      // Handle signed vs unsigned
+      if($field->getAttribute('unsigned')) {
+        $extras[] = 'UNSIGNED';
+      }
+      // Handle nullability
+      $null = '';
+      if($field->getAttribute('nullable')) {
+        $null = 'NULL';
+      } else {
+        if($this->driver != "sqlite" || $field->type != "enum") {
+          $null = 'NOT NULL';
+        }
+      }
+      // Unique 
+      if($field->getAttribute('unique')) {
+        $extras[] = 'UNIQUE';
+      }
+
+      
       $definition .= "\n" . sprintf("%s %s %s %s", $field->name, $type, $null, implode(' ', $extras)) . ",";
     }
 
     if($this->timestamps) {
-      $definition .= "\ncreated TIMESTAMP NOT NULL DEFAULT NOW(),";
-      $definition .= "\nupdated TIMESTAMP NULL DEFAULT NULL,"; 
-      $definition .= "\ndeleted TIMESTAMP NULL DEFAULT NULL,";
+      if($this->driver == "sqlite") {
+        $definition .= "\ncreated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,";
+        $definition .= "\nmodified TIMESTAMP NULL DEFAULT NULL,";
+        $definition .= "\ndeleted TIMESTAMP NULL DEFAULT NULL,";
+      } else {
+        $definition .= "\ncreated TIMESTAMP NOT NULL DEFAULT NOW(),";
+        $definition .= "\nmodified TIMESTAMP NULL DEFAULT NULL,"; 
+        $definition .= "\ndeleted TIMESTAMP NULL DEFAULT NULL,";
+      }
     }
+
+    $definition = substr($definition, 0,-1);
 
     $definition = sprintf("%s\n%s\n", $definition, $after);
     $fields = implode(',', $fields);
     $query = sprintf('CREATE TABLE `%s` (%s)', $this->name, $definition);
-    var_dump($query);
     return $query;
   }
 }
