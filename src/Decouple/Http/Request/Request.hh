@@ -1,5 +1,5 @@
 <?hh // strict
-namespace Decouple\Http\Request;
+namespace Decouple\HTTP\Request;
 class Request {
   public Vector<string> $routeParams;
   public function __construct(

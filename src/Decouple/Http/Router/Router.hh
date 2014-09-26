@@ -1,8 +1,8 @@
 <?hh // strict
-namespace Decouple\Http\Router;
-use Decouple\Http\Router\Route\AbstractRoute;
+namespace Decouple\HTTP\Router;
+use Decouple\HTTP\Router\Route\AbstractRoute;
 use Decouple\Decoupler\Decoupler;
-use Decouple\Http\Request\Request;
+use Decouple\HTTP\Request\Request;
 class Router {
   private Vector<AbstractRoute> $routes;
   public function __construct(protected Decoupler $decoupler) {
@@ -11,14 +11,14 @@ class Router {
   public function serve(string $pattern, mixed $function=null) : int {
     if(is_callable($function)) {
       if(is_array($function)) {
-        $route = new \Decouple\Http\Router\Route\MethodRoute($pattern, $function);
+        $route = new \Decouple\HTTP\Router\Route\MethodRoute($pattern, $function);
       } else {
-        $route = new \Decouple\Http\Router\Route\FunctionRoute($pattern, $function);
+        $route = new \Decouple\HTTP\Router\Route\FunctionRoute($pattern, $function);
       }
       return $this->add($route);
     } else if(is_string($function)) {
       if(class_exists($function)) {
-        $route = new \Decouple\Http\Router\Route\RestfulRoute($pattern, $function);
+        $route = new \Decouple\HTTP\Router\Route\RestfulRoute($pattern, $function);
         return $this->add($route);
       } else if(stristr($function, '@')) {
         /** Try to automagically load Class@method syntax **/
@@ -26,8 +26,18 @@ class Router {
         if(!class_exists($class) && method_exists($class, $method)) {
           throw new \Exception(sprintf("Service is not a valid class: %s", $class));
         }
-        $route = new \Decouple\Http\Router\Route\MethodRoute($pattern, [$class,$method]);
+        $route = new \Decouple\HTTP\Router\Route\MethodRoute($pattern, [$class,$method]);
         return $this->add($route);
+      }
+    } else if(is_array($function)) {
+      $first = array_shift($function);
+      $method = array_shift($function);
+      if(class_exists($first)) {
+        throw new \Exception(sprintf("Method %s does not exist in class [%s]", $method, $first));
+      } else if(is_object($first)) {
+        throw new \Exception(sprintf("Method %s does not exist in object [%s]", $method, (string)get_class($first)));
+      } else {
+        throw new \Exception(sprintf("Invalid class/method provided for route %s [%s]", $pattern, $first));
       }
     }
     throw new \Exception(sprintf("Invalid route function provided for route %s [%s]", $pattern, $function));

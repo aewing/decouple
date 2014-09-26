@@ -3,7 +3,6 @@ namespace Decouple\Decoupler;
 require_once dirname(__FILE__) . "/_Decouple.hh";
 class Decoupler {
   public function __construct(protected Map<string,mixed> $dependencies) {
-  
   }
   public function setAll(Map<string,mixed> $dependencies) : void {
     foreach($dependencies as $name => $dependency) {
@@ -81,6 +80,8 @@ class Decoupler {
       return $this->injectFunction($target);
     } else if(is_object($target)) {
       return $this->injectObject($target);
+    } else if(is_string($target) && class_exists($target)) {
+      return $this->injectInstance($target);
     } else {
       throw new \Exception(sprintf("Unable to inject target %s", (string)$target));
     }

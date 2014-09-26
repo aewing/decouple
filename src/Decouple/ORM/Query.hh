@@ -1,6 +1,7 @@
 <?hh // strict
 namespace Decouple\ORM;
 use PDO;
+use PDOStatement;
 class Query {
   private string $action;
   private Map<string,mixed> $data;
@@ -8,13 +9,15 @@ class Query {
   private Vector<Vector<mixed>> $whereData;
   public ?\PDOStatement $query;
   public ?string $query_raw;
-  public function __construct(public string $table='', public string $driver='mysql')
+
+  public function __construct(public string $table, protected Connector $connector)
   {
     $this->selectFields = Vector {};
     $this->data = Map {};
     $this->whereData = Vector {};
     $this->action = 'select';
   }
+
   public function select(?Vector<mixed> $fields=null) : Query {
     $this->action = 'select';
     if(is_null($fields)) {
@@ -25,12 +28,14 @@ class Query {
     }
     return $this;
   }
+
   public function update(Map<string,mixed> $data) : Query {
     $this->action = 'update';
     $data['modified'] = time();
     $this->data->setAll($data);
     return $this;
   }
+
   public function delete(bool $soft=false) : Query {
     if(!$soft) {
       $this->action = 'delete';
@@ -42,15 +47,28 @@ class Query {
       return $this;
     }
   }
-  public function insert(Map<string,mixed> $data) : Query\Prepared {
+
+  public function insert(Map<string,mixed> $data) : ?Map<string,mixed> {
     $this->action = 'insert';
     $this->data->setAll($data);
-    return $this->buildQuery();
+    try { 
+      $this->execute();
+      $id = $this->connector->pdo()->lastInsertId();
+      if($id) {
+        $this->reset();
+        return $this->select()->where('id','=',$id)->fetch();
+      }
+      return null;
+    } catch(\Exception $e) {
+      return null;
+    }
   }
+
   public function where(string $field, string $comp, mixed  $value) : Query {
     $this->whereData->add(Vector{$field, $comp, $value});
     return $this;
   }
+
   public function whereAll(KeyedTraversable<string,string> $array) : Query
   {
     foreach($array as $key => $where) 
@@ -65,7 +83,8 @@ class Query {
     }
     return $this;
   }
-  public function buildQuery() : Query\Prepared {
+
+  public function build() : Query\Prepared {
     $query = '';
     if($this->action == 'select') {
       $query = 'SELECT ' . implode(',', $this->selectFields) . ' FROM ' . $this->table;
@@ -76,7 +95,7 @@ class Query {
           $query .= $var .' = :' . $var . ', ';
         }
       }
-      if($this->driver == 'sqlite') {
+      if($this->connector->driver() == 'sqlite') {
         $query .= 'modified = strftime("%s", :modified)';
       } else {
         $query .= 'modified = FROM_UNIXTIME(:modified)';
@@ -120,14 +139,40 @@ class Query {
     $fields->setAll($this->data);
     return new Query\Prepared($query, $fields);
   }
+
   public function raw(mixed $value) : Query\Raw {
     return new Query\Raw($value);
   }
+
   public function reset() : void
   {
     $this->selectFields = Vector {};
     $this->data = Map {};
     $this->whereData = Vector {};
     $this->action = 'select';
+  }
+
+  public function fetch() : Map<string,mixed> {
+    return Map::fromArray($this->execute()->fetch());
+  }
+
+  public function fetchAll() : Vector<Map<string,mixed>> {
+    $fetched = $this->execute()->fetchAll();
+    $result = Vector {};
+    foreach($fetched as $row) {
+      $result[] = Map::fromArray($row);
+    }
+    return $result;
+  }
+
+  public function fetchColumn(int $column=0) : mixed {
+    return $this->execute()->fetchColumn($column);
+  }
+
+  public function execute() : PDOStatement {
+    $build = $this->build();
+    $statement = $this->connector->statement($build->query);
+    $statement->execute($build->values);
+    return $statement;
   }
 }

@@ -6,14 +6,19 @@ class FrontController {
   public function index(Connector $db, DebugRegistry $debug) : string {
     $view = <front:index></front:index>;
     $news = $db->table('news');
-    $query = $news
+    $news->insert([
+      'title' => 'Article C',
+      'content' => 'Another article content'
+    ]);
+
+    $articles = $news
       ->select(Vector {'id','name','content','author','create_date','image'})
       ->where('delete_date', 'is', new Raw(null))
+      ->fetchAll()
     ;
-    $result = $db->fetchAll($query);
 
     $content = <div/>;
-    if(is_null($result)) {
+    if(is_null($articles)) {
       $error = 
         <div class="ui error message">
           <h2>Oops!</h2>
@@ -21,16 +26,16 @@ class FrontController {
         </div>;
       $content->appendChild($error);
     } else {
-      $articles = <news:articles/>;
-      foreach($result as $article) {
+      $container = <news:articles/>;
+      foreach($articles as $article) {
         $body = <news:article/>;
         $body->setAttribute('title', $article['name']);
         $body->setAttribute('content', $article['content']);
         $body->setAttribute('date', $article['create_date']);
         $body->setAttribute('image', $article['image']);
-        $articles->appendChild($body);
+        $container->appendChild($body);
       }
-      $content->appendChild($articles);
+      $content->appendChild($container);
     }
     $view->appendChild($content);
     $view->appendChild(<br/>);

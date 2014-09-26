@@ -1,10 +1,10 @@
 <?hh // strict
-namespace Decouple\Http;
-use Decouple\Http\Request\Request;
-use Decouple\Http\Router\Router;
+namespace Decouple\HTTP;
+use Decouple\HTTP\Request\Request;
+use Decouple\HTTP\Router\Router;
 use Decouple\Decoupler\Decoupler;
-use Decouple\Http\Router\Route\AbstractRoute;
-class Http {
+use Decouple\HTTP\Router\Route\AbstractRoute;
+class App {
   public function __construct(public Request $request, protected Router $router, protected Decoupler $decoupler) {
   }
   public function execute() : mixed {
@@ -36,7 +36,7 @@ class Http {
       }
     }
     if(!is_object($service)) {
-      throw new \Exception(sprintf("Services registered with Http must be objects! [%s is set to %s]", $name, (string)$service));
+      throw new \Exception(sprintf("Services registered with HTTP must be objects! [%s is set to %s]", $name, (string)$service));
     }
     $this->decoupler->set($name, $service);
   }

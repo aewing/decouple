@@ -1,10 +1,17 @@
 <phpunit bootstrap="vendor/autoload.php">
   <testsuites>
-    <testsuite name="Decouple Tests">
+    <testsuite name="Core">
       <directory>Tests/Decoupler</directory>
+    </testsuite>
+    <testsuite name="HTTP">
       <directory>Tests/Http</directory>
-      <directory>Tests/ORM</directory>
       <directory>Tests/Ui</directory>
+    </testsuite>
+    <testsuite name="ORM">
+      <directory>Tests/ORM</directory>
+    </testsuite>
+    <testsuite name="Console">
+      <directory>Tests/Console</directory>
     </testsuite>
   </testsuites>
 </phpunit>

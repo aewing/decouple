@@ -1,5 +1,5 @@
 <?hh // strict
-namespace Decouple\Http\Request;
+namespace Decouple\HTTP\Request;
 class Uri {
   private Vector<string> $parts;
   private string $uri;

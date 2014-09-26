@@ -1,7 +1,7 @@
 <?hh // strict
-namespace Decouple\Http\Router\Route;
+namespace Decouple\HTTP\Router\Route;
 use Decouple\Decoupler\Decoupler;
-use Decouple\Http\Request\Request;
+use Decouple\HTTP\Request\Request;
 interface RouteInterface {
   public function execute(Request $request) : mixed;
 }

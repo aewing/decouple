@@ -1,10 +1,10 @@
 <?hh // partial 
-require_once dirname(__FILE__) . "/../Fixtures/HttpRouterFixture.php";
-use Decouple\Http\Request\Request;
-use Decouple\Http\Request\Uri;
+require_once dirname(__FILE__) . "/../Fixtures/HTTPRouterFixture.php";
+use Decouple\HTTP\Request\Request;
+use Decouple\HTTP\Request\Uri;
 use Decouple\Decoupler\Decoupler;
-use Decouple\Http\Router\Router;
-class HttpRouterTest extends PHPUnit_Framework_TestCase {
+use Decouple\HTTP\Router\Router;
+class HTTPRouterTest extends PHPUnit_Framework_TestCase {
 
   public function testRouteFunctionA() : void {
     $uri = new Uri('/foo/bar');
@@ -21,7 +21,7 @@ class HttpRouterTest extends PHPUnit_Framework_TestCase {
   public function testRouteMethodA() : void {
     $uri = new Uri('/baz/bar');
     $result = $this->_testRoute($uri);
-    $this->assertEquals($result, 'Controller::/baz/bar/42');
+    $this->assertEquals($result, 'TestController::baz:42');
   }
 
   public function testRouteMethodB() : void {
@@ -34,8 +34,8 @@ class HttpRouterTest extends PHPUnit_Framework_TestCase {
     $request = new Request($uri, Map::fromArray(['baz'=>true]), Map {}, Map {});
     $dependencies = Map {
       "RouteDependency" => new RouteDependency(),
-      "Decouple\Http\Request\Uri" => $uri,
-      "Decouple\Http\Request\Request" => $request,
+      "Decouple\HTTP\Request\Uri" => $uri,
+      "Decouple\HTTP\Request\Request" => $request,
       "RoutePropertyDependency" => new RoutePropertyDependency(),
       "RouteConstructorDependency" => new RouteConstructorDependency()
     };

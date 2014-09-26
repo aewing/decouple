@@ -6,7 +6,7 @@ class Create {
   private Map<string,Create\Field> $map;
   private bool $timestamps;
   private bool $softDeletes;
-  public function __construct(private string $name, private string $driver="mysql")
+  public function __construct(protected string $name, protected Connector $connector)
   {
     $this->map = Map {};
     $this->timestamps = false;
@@ -62,6 +62,12 @@ class Create {
   {
     $this->softDeletes = $is;
   }
+  public function toString() : string {
+    return serialize($this->map);
+  }
+  public function fromString(string $string) : void {
+    $this->map = new Map(unserialize($string));
+  }
   public function sql() : string  {
     $definition = "";
     $fields = [];
@@ -83,13 +89,13 @@ class Create {
 
 
       if($field->type == "int") {
-        if($this->driver == "sqlite") {
+        if($this->connector->driver() == "sqlite") {
           $type = "INTEGER";
         } else {
           $type = sprintf("INT(%s)", $field->getAttribute('length')); 
         }
       } else if($field->type == "id") {
-        if($this->driver !== "sqlite") {
+        if($this->connector->driver() !== "sqlite") {
           $type = sprintf("INT(%s)", $field->getAttribute('length')); 
           $extras[] = "AUTO_INCREMENT";
           $after = sprintf("PRIMARY KEY (%s)", $field->name);
@@ -98,7 +104,7 @@ class Create {
           $extras[] = "PRIMARY KEY";
         }
       } else if($field->type == "varchar") {
-        if($this->driver == "sqlite") {
+        if($this->connector->driver() == "sqlite") {
           $type = "TEXT";
         } else {
           $type = sprintf("VARCHAR(%s)", $field->getAttribute('length')); 
@@ -106,7 +112,7 @@ class Create {
       } else if($field->type == "text") {
         $type = "TEXT";
       } else if($field->type == "enum") {
-        if($this->driver !== "sqlite") {
+        if($this->connector->driver() !== "sqlite") {
           $type = sprintf("ENUM('%s')", implode("','", $field->getAttribute('values')));
         } else {
           $type = "TEXT";
@@ -123,7 +129,7 @@ class Create {
       if($field->getAttribute('nullable')) {
         $null = 'NULL';
       } else {
-        if($this->driver != "sqlite" || $field->type != "enum") {
+        if($this->connector->driver() != "sqlite" || $field->type != "enum") {
           $null = 'NOT NULL';
         }
       }
@@ -137,7 +143,7 @@ class Create {
     }
 
     if($this->timestamps) {
-      if($this->driver == "sqlite") {
+      if($this->connector->driver() == "sqlite") {
         $definition .= "\ncreated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,";
         $definition .= "\nmodified TIMESTAMP NULL DEFAULT NULL,";
         $definition .= "\ndeleted TIMESTAMP NULL DEFAULT NULL,";

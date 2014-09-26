@@ -6,7 +6,7 @@ use Decouple\Registry\Paths;
 use Decouple\Ui\Ui;
 use Decouple\Decoupler\Decoupler;
 use Decouple\Http\Router\Router;
-use Decouple\Http\Http;
+use Decouple\Http\App;
 // Http request
 $uri = new Uri($_SERVER['REQUEST_URI']);
 $get = Map::fromArray($_GET);
@@ -41,7 +41,7 @@ $decoupler = new Decoupler(Map {
 $router = new Router($decoupler);
 
 // Http application
-$app = new Http($request, $router, $decoupler);
+$app = new App($request, $router, $decoupler);
 
 // Bootstrap
 require_once $paths->get('app') . '/bootstrap/http.services.hh';

@@ -1,7 +1,7 @@
 <?hh // strict
-namespace Decouple\Http\Router\Route;
-use Decouple\Http\Request\Request;
-use Decouple\Http\Request\Uri;
+namespace Decouple\HTTP\Router\Route;
+use Decouple\HTTP\Request\Request;
+use Decouple\HTTP\Request\Uri;
 abstract class AbstractRoute implements RouteInterface {
 
   public function __construct(private string $pattern, protected mixed $callback=null) {
