@@ -7,7 +7,7 @@ class Table {
     return $query->select($fields);
   }
   public function create() : Table\Create {
-    return new Table\Create($this->name, $this->connector);
+    return new Table\Create($this->name, $this->connector->driver());
   }
   public function insert(array<string,mixed> $data) : ?Map<string,mixed> {
     $query = new Query($this->name, $this->connector);

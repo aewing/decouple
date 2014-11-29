@@ -15,6 +15,6 @@ class TestController {
     return 'TestController::baz:' . $dep->double(21);
   }
   public function bang(Request $request, RouteDependency $dep) : string {
-    return sprintf("Controller::%s/%s", $request->routeParams[1], $dep->double(21));
+    return "Controller::" . $request->routeParams[1] . "/" . $dep->double(21);
   }
 }

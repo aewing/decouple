@@ -7,7 +7,7 @@ class MigrationTest extends PHPUnit_Framework_TestCase {
   private string $ORMTestDir = 'Tests/ORM/data';
   public function testMigrationA() {
     $connector = $this->_connector();
-    $table = new Migration('articles', $connector);
+    $table = new Migration('articles', $connector->driver());
     $table->identifier('id');
     $table->string('title', 55);
     $table->text('content')->nullable()->default(null);
@@ -15,7 +15,7 @@ class MigrationTest extends PHPUnit_Framework_TestCase {
     $table->timestamps();
 
     $serialized = $table->toString();
-    $duplicated = Migration::restore('articles', $serialized, $connector);
+    $duplicated = Migration::restore('articles', $serialized, $connector->driver());
     $duplicated->text('diff')->nullable()->default(null);
 
     $diff = MigrationManager::diff($table, $duplicated);

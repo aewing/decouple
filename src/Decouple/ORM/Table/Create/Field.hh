@@ -1,7 +1,7 @@
 <?hh // strict
 namespace Decouple\ORM\Table\Create;
 class Field {
-  private Map<string,mixed> $attributes;
+  public Map<string,mixed> $attributes;
   public function __construct(public string $name, public string $type) {
     $this->attributes = Map {};
   }

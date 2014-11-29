@@ -2,11 +2,11 @@
 namespace Decouple\ORM\Migration;
 use Decouple\ORM\Table\Create;
 use Decouple\ORM\Connector;
-use Decouple\ORM\Create\Field;
+use Decouple\ORM\Table\Create\Field;
 class Migration extends Create {
-  public static function restore(string $name, string $string, Connector $connector) : Migration
+  public static function restore(public string $name, string $string, string $connector_type='mysql') : Migration
   {
-    $migration = new Migration($name, $connector);
+    $migration = new Migration($name, $connector_type);
     $migration->fromString($string);
     return $migration;
   }

@@ -91,7 +91,9 @@ class Query {
     } else if($this->action == 'update') {
       $query = 'UPDATE ' . $this->table . ' SET ';
       foreach($this->data as $var => $val) {
-        if($var !== 'modified') {
+        if($val instanceof \Decouple\ORM\Query\Raw) {
+          $query .= $var .' = ' . (string)$val->getValue();
+        } elseif($var !== 'modified') {
           $query .= $var .' = :' . $var . ', ';
         }
       }
@@ -105,11 +107,15 @@ class Query {
       $values = [];
       foreach($this->data as $var => $val) {
         $columns[] = $var;
-        $values[] = ':' . $var;
+        if($val instanceof \Decouple\ORM\Query\Raw) {
+          $values[] = $val->getValue();
+        } else {
+          $values[] = ':' . $var;
+        }
       }
       $columns = implode(',', $columns);
       $values = implode(',', $values);
-      $query = sprintf('INSERT INTO %s (%s) VALUES(%s)', $this->table, $columns, $values);
+      $query = 'INSERT INTO ' . $this->table . ' (' . $columns  . ') VALUES(' . $values  . ')';
     } else if($this->action == 'delete') {
       $query = 'DELETE FROM ' . $this->table;
     }
@@ -118,19 +124,23 @@ class Query {
     if(count($this->whereData) > 0) {
       $query .= ' WHERE ';
       foreach($this->whereData as $vec) {
+        $field = (string)$vec[0];
+        $operator = (string)$vec[1];
         $value = $vec[2];
+        $standIn = ':' . $field;
         if(is_null($value)) {
           $val = null;
-        } else if(is_array($value)) {
+        } elseif(is_array($value)) {
           $val = json_encode($value);
-        } else if(is_object($value) && $value instanceof Query\Raw) {
+        } elseif($value instanceof \Decouple\ORM\Query\Raw) {
           $val = $value->getValue();
+          $standIn = (string)$val;
         } else {
           $val = $value;
         }
         $whereFields[(string)$vec[0]] = $val;
 
-        $query .= (string)$vec[0] . ' ' . (string)$vec[1] . ' :' . (string)$vec[0] . ' AND ';
+        $query .= $field . ' ' . $operator . ' ' . $standIn . ' AND ';
       }
       $query = substr($query,0,-4);
     }
@@ -172,7 +182,13 @@ class Query {
   public function execute() : PDOStatement {
     $build = $this->build();
     $statement = $this->connector->statement($build->query);
-    $statement->execute($build->values);
+    $values = $build->values;
+    foreach($values as $index => $value) {
+      if($value instanceof \Decouple\ORM\Query\Raw) {
+        unset($values[$index]);
+      }
+    }
+    $statement->execute($values);
     return $statement;
   }
 }

@@ -35,15 +35,20 @@ function decouple_inject_object(mixed $obj, Decouple\Decoupler\Decoupler $decoup
   // Reflect on the properties
   $rfp = $rfo->getProperties();
   foreach($rfp as $property) {
-    if(substr($property->info['type'], 0, 1) == '?') {
-      $type = str_replace('?', '', $property->info['type']);
-      if (class_exists($type)) {
-        if($decoupler->contains($type)) {
-          $name = $property->info['name'];
-          $obj->$name = $decoupler->get($type);
+    /*
+    if(isset($property->info)) {
+      if(substr($property->info['type'], 0, 1) == '?') {
+        $type = str_replace('?', '', $property->info['type']));
+        if (class_exists($type)) {
+          if($decoupler->contains($type)) {
+            $name = $property->info['name'];
+            $obj->$name = $decoupler->get($type);
+          }
         }
       }
     }
+    */
+    var_dump($property);exit();
   }
   return $obj;
 }
